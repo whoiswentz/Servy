@@ -44,7 +44,23 @@ Accept: */*
 """)
 
 Servy.Handler.handle("""
+GET /lions?id=1 HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+""")
+
+Servy.Handler.handle("""
 GET /asdas HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+""")
+
+Servy.Handler.handle("""
+GET /wildlife HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
