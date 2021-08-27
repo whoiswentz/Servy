@@ -1,6 +1,8 @@
 defmodule Servy.Handler do
-
   require Logger
+
+  import Servy.Parser, only: [parse: 1]
+  import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
 
   @pages_path Path.join(['..', '..', 'pages'])
 
@@ -13,30 +15,6 @@ defmodule Servy.Handler do
     |> track
     |> format_response
   end
-
-  def parse(request) do
-    [method, path, _] =
-      request
-      |> String.split("\n")
-      |> List.first()
-      |> String.split(" ")
-
-    %{method: method, path: path, response_body: "", status_code: nil}
-  end
-
-  def rewrite_path(%{path: path} = request) do
-    regex = ~r{\/(?<thing>\w+)\?id=(?<id>\d+)}
-    matches = Regex.named_captures(regex, path)
-    rewrite_path_captures(request, matches)
-  end
-
-  def rewrite_path_captures(request, %{"thing" => thing, "id" => id}) do
-    %{request | path: "/#{thing}/#{id}"}
-  end
-
-  def rewrite_path_captures(request, nil), do: request
-
-  def log(request), do: IO.inspect(request)
 
   def route(%{method: "GET", path: "/wildthings"} = request) do
     %{request | response_body: "Bears, Lions, Tigers", status_code: 200}
@@ -55,7 +33,7 @@ defmodule Servy.Handler do
   end
 
   def route(%{method: "GET", path: "/pages/" <> page} = request) do
-    file = 
+    file =
       @pages_path
       |> Path.expand(__DIR__)
       |> Path.join(page <> ".html")
@@ -64,11 +42,13 @@ defmodule Servy.Handler do
 
     # We can use multi clause function here, but for learning I won't
     case File.read(file) do
-      {:ok, content} -> 
+      {:ok, content} ->
         %{request | status_code: 200, response_body: content}
-      {:error, :enoent} -> 
+
+      {:error, :enoent} ->
         %{request | status_code: 404, response_body: "File not found!"}
-      {:error, reason} -> 
+
+      {:error, reason} ->
         %{request | status_code: 500, response_body: "File error: #{reason}"}
     end
   end
@@ -76,13 +56,6 @@ defmodule Servy.Handler do
   def route(%{path: path} = request) do
     %{request | response_body: "No #{path} here", status_code: 404}
   end
-
-  def track(%{status_code: 404, path: path} = request) do
-    Logger.error("The #{path} is on the loose")
-    request
-  end
-
-  def track(request), do: request
 
   def format_response(%{response_body: response_body, status_code: status_code}) do
     """
