@@ -2,6 +2,7 @@ defmodule Servy.Handler do
   def handle(request) do
     request
     |> parse
+    |> log
     |> route
     |> format_response
   end
@@ -16,17 +17,23 @@ defmodule Servy.Handler do
     %{method: method, path: path, response_body: ""}
   end
 
-  def route(request) do
-    %{method: "GET", path: "/wildthings", response_body: "Bears, Lions, Tigers"}
+  def log(request), do: IO.inspect(request)
+
+  def route(%{method: "GET", path: "/wildthings"} = request) do
+    %{request | response_body: "Bears, Lions, Tigers"}
   end
 
-  def format_response(request) do
+  def route(%{method: "GET", path: "/bears"} = request) do
+    %{request | response_body: "Teddy, Smokey, Paddington"}
+  end
+
+  def format_response(%{response_body: response_body} = _request) do
     """
     HTTP/1.1 200 OK
     Content-Type: text/html
-    Content-Length: 20
+    Content-Length: #{String.length(response_body)}
 
-    Bears, Lions, Tigers
+    #{response_body}
     """
   end
 end
