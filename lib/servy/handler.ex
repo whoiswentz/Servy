@@ -52,6 +52,19 @@ defmodule Servy.Handler do
     %{request | response_body: "Bears must never be deleted"}
   end
 
+  def route(%{method: "GET", path: "/about"} = request) do
+    file = 
+      Path.join(['..', '..', 'pages'])
+      |> Path.expand(__DIR__)
+      |> Path.join("about.html")
+
+    case File.read(file) do
+      {:ok, content} -> %{request | status_code: 200, response_body: content}
+      {:error, :enoent} -> %{request | status_code: 404, response_body: "File not found!"}
+      {:error, reason} -> %{request | status_code: 500, response_body: "File error: #{reason}"}
+    end
+  end
+
   def route(%{path: path} = request) do
     %{request | response_body: "No #{path} here", status_code: 404}
   end

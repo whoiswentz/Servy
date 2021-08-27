@@ -52,7 +52,7 @@ Accept: */*
 """)
 
 Servy.Handler.handle("""
-GET /asdas HTTP/1.1
+GET /about HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
