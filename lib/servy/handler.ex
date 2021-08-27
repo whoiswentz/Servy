@@ -2,6 +2,8 @@ defmodule Servy.Handler do
 
   require Logger
 
+  @pages_path Path.join(['..', '..', 'pages'])
+
   def handle(request) do
     request
     |> parse
@@ -52,11 +54,13 @@ defmodule Servy.Handler do
     %{request | response_body: "Bears must never be deleted"}
   end
 
-  def route(%{method: "GET", path: "/about"} = request) do
+  def route(%{method: "GET", path: "/pages/" <> page} = request) do
     file = 
-      Path.join(['..', '..', 'pages'])
+      @pages_path
       |> Path.expand(__DIR__)
-      |> Path.join("about.html")
+      |> Path.join(page <> ".html")
+
+    Logger.info("Serving request to page #{file}")
 
     # We can use multi clause function here, but for learning I won't
     case File.read(file) do

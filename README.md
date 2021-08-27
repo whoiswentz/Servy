@@ -52,7 +52,15 @@ Accept: */*
 """)
 
 Servy.Handler.handle("""
-GET /about HTTP/1.1
+GET /pages/about HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+""")
+
+Servy.Handler.handle("""
+GET /pages/form HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
