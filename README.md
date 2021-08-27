@@ -34,3 +34,19 @@ User-Agent: ExampleBrowser/1.0
 Accept: */*
 
 """)
+
+Servy.Handler.handle("""
+GET /bears/1 HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+""")
+
+Servy.Handler.handle("""
+GET /asdas HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+""")
