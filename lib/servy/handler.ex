@@ -58,10 +58,14 @@ defmodule Servy.Handler do
       |> Path.expand(__DIR__)
       |> Path.join("about.html")
 
+    # We can use multi clause function here, but for learning I won't
     case File.read(file) do
-      {:ok, content} -> %{request | status_code: 200, response_body: content}
-      {:error, :enoent} -> %{request | status_code: 404, response_body: "File not found!"}
-      {:error, reason} -> %{request | status_code: 500, response_body: "File error: #{reason}"}
+      {:ok, content} -> 
+        %{request | status_code: 200, response_body: content}
+      {:error, :enoent} -> 
+        %{request | status_code: 404, response_body: "File not found!"}
+      {:error, reason} -> 
+        %{request | status_code: 500, response_body: "File error: #{reason}"}
     end
   end
 
