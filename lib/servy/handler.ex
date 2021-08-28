@@ -4,7 +4,7 @@ defmodule Servy.Handler do
   import Servy.Parser, only: [parse: 1]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
 
-  @pages_path Path.join(['..', '..', 'pages'])
+  @pages_path Path.expand('pages', File.cwd!())
 
   def handle(request) do
     request
