@@ -1,6 +1,8 @@
 defmodule Servy.Handler do
   require Logger
 
+  alias Servy.Request
+
   import Servy.Parser, only: [parse: 1]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
 
@@ -16,23 +18,23 @@ defmodule Servy.Handler do
     |> format_response
   end
 
-  def route(%{method: "GET", path: "/wildthings"} = request) do
+  def route(%Request{method: "GET", path: "/wildthings"} = request) do
     %{request | response_body: "Bears, Lions, Tigers", status_code: 200}
   end
 
-  def route(%{method: "GET", path: "/bears"} = request) do
+  def route(%Request{method: "GET", path: "/bears"} = request) do
     %{request | response_body: "Teddy, Smokey, Paddington", status_code: 200}
   end
 
-  def route(%{method: "GET", path: "/bears/" <> id} = request) do
+  def route(%Request{method: "GET", path: "/bears/" <> id} = request) do
     %{request | response_body: "Bear #{id}", status_code: 200}
   end
 
-  def route(%{method: "DELETE", path: "/bears/" <> _id} = request) do
+  def route(%Request{method: "DELETE", path: "/bears/" <> _id} = request) do
     %{request | response_body: "Bears must never be deleted"}
   end
 
-  def route(%{method: "GET", path: "/pages/" <> page} = request) do
+  def route(%Request{method: "GET", path: "/pages/" <> page} = request) do
     file =
       @pages_path
       |> Path.expand(__DIR__)
@@ -53,28 +55,17 @@ defmodule Servy.Handler do
     end
   end
 
-  def route(%{path: path} = request) do
+  def route(%Request{path: path} = request) do
     %{request | response_body: "No #{path} here", status_code: 404}
   end
 
-  def format_response(%{response_body: response_body, status_code: status_code}) do
+  def format_response(%Request{response_body: response_body} = request) do
     """
-    HTTP/1.1 #{status_reason(status_code)}
+    HTTP/1.1 #{Request.full_status(request)}
     Content-Type: text/html
     Content-Length: #{String.length(response_body)}
 
     #{response_body}
     """
-  end
-
-  defp status_reason(code) do
-    %{
-      200 => "OK",
-      201 => "Created",
-      401 => "Unauthorized",
-      403 => "Forbidden",
-      404 => "Not Found",
-      500 => "Internal Server Error"
-    }[code]
   end
 end

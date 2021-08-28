@@ -1,4 +1,6 @@
 defmodule Servy.Parser do
+  alias Servy.Request
+
   def parse(request) do
     [method, path, _] =
       request
@@ -6,7 +8,7 @@ defmodule Servy.Parser do
       |> List.first()
       |> String.split(" ")
 
-    %{
+    %Request{
       method: method,
       path: path,
       response_body: "",
