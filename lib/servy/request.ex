@@ -3,6 +3,7 @@ defmodule Servy.Request do
             path: "",
             response_body: "",
             body: %{},
+            headers: %{},
             status_code: nil
 
   def full_status(%Servy.Request{status_code: status}) do
