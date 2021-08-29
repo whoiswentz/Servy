@@ -3,6 +3,7 @@ defmodule Servy.Request do
             path: "",
             response_body: "",
             body: %{},
+            params: %{},
             headers: %{},
             status_code: nil
 

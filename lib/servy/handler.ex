@@ -2,6 +2,7 @@ defmodule Servy.Handler do
   require Logger
 
   alias Servy.Request
+  alias Servy.BearController
 
   import Servy.Parser, only: [parse: 1]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
@@ -26,12 +27,13 @@ defmodule Servy.Handler do
     %{request | response_body: "Teddy, Smokey, Paddington", status_code: 200}
   end
 
-  def route(%Request{method: "POST", path: "/bears", body: body} = request) do
-    %{request | status_code: 201, response_body: "Bear #{body["name"]} created"}
+  def route(%Request{method: "POST", body: body, path: "/bears"} = request) do
+    BearController.create(request, body)
   end
 
-  def route(%Request{method: "GET", path: "/bears/" <> id} = request) do
-    %{request | response_body: "Bear #{id}", status_code: 200}
+  def route(%Request{method: "GET", params: params, path: "/bears/" <> id} = request) do
+    requet_params = Map.put(params, "id", id)
+    BearController.show(request, requet_params)
   end
 
   def route(%Request{method: "DELETE", path: "/bears/" <> _id} = request) do
