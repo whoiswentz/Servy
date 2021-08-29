@@ -1,5 +1,9 @@
 defmodule Servy.Request do
-  defstruct method: "", path: "", response_body: "", status_code: nil
+  defstruct method: "",
+            path: "",
+            response_body: "",
+            body: %{},
+            status_code: nil
 
   def full_status(%Servy.Request{status_code: status}) do
     "#{status} #{status_reason(status)}"

@@ -26,6 +26,10 @@ defmodule Servy.Handler do
     %{request | response_body: "Teddy, Smokey, Paddington", status_code: 200}
   end
 
+  def route(%Request{method: "POST", path: "/bears", body: body} = request) do
+    %{request | status_code: 201, response_body: "Bear #{body["name"]} created"}
+  end
+
   def route(%Request{method: "GET", path: "/bears/" <> id} = request) do
     %{request | response_body: "Bear #{id}", status_code: 200}
   end
