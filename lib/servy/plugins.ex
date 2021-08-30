@@ -1,6 +1,10 @@
 defmodule Servy.Plugins do
   require Logger
 
+  def rewrite_path(%{path: "/wildlife"} = request) do
+    %{request | path: "/wildthings"}
+  end
+
   def rewrite_path(%{path: path} = request) do
     regex = ~r{\/(?<thing>\w+)\?id=(?<id>\d+)}
     matches = Regex.named_captures(regex, path)

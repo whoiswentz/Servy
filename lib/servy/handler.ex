@@ -67,10 +67,10 @@ defmodule Servy.Handler do
 
   def format_response(%Request{response_body: response_body} = request) do
     """
-    HTTP/1.1 #{Request.full_status(request)}
-    Content-Type: text/html
-    Content-Length: #{String.length(response_body)}
-
+    HTTP/1.1 #{Request.full_status(request)}\r
+    Content-Type: text/html\r
+    Content-Length: #{String.length(response_body)}\r
+    \r
     #{response_body}
     """
   end

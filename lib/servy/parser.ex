@@ -2,12 +2,12 @@ defmodule Servy.Parser do
   alias Servy.Request
 
   def parse(request) do
-    [request_info, body] = String.split(request, "\n\n")
-    [start_line | headers] = String.split(request_info, "\n")
+    [request_info, body] = String.split(request, "\r\n\r\n")
+    [start_line | headers] = String.split(request_info, "\r\n")
     [method, path, _] = start_line |> String.split(" ")
 
     parsed_headers = parse_headers(headers)
-    decoded_body = parse_body(parsed_headers["Content-Type"], body)
+    decoded_body = parse_params(parsed_headers["Content-Type"], body)
 
     %Request{
       method: method,
@@ -17,11 +17,22 @@ defmodule Servy.Parser do
     }
   end
 
-  defp parse_body("application/x-www-form-urlencoded", body) do
-    body |> String.trim() |> URI.decode_query()
+  @doc """
+  Parse the given param string of the form `key1=value1&key2=value2`
+  into a map with corresponding keys and values.
+
+  ## Example
+    iex> params_string = "key1=value1&key2=value2"
+    iex> Servy.Parser.parse_params("application/x-www-form-urlencoded", params_string)
+    %{"key1" => "value1", "key2" => "value2"}
+    iex> Servy.Parser.parse_params("invalid/type", params_string)
+    %{}
+  """
+  def parse_params("application/x-www-form-urlencoded", params) do
+    params |> String.trim() |> URI.decode_query()
   end
 
-  defp parse_body(_, _), do: %{}
+  def parse_params(_, _), do: %{}
 
   def parse_headers(string_header) do
     Enum.reduce(string_header, %{}, fn header, headers_map ->
