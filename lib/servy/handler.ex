@@ -24,7 +24,7 @@ defmodule Servy.Handler do
   end
 
   def route(%Request{method: "GET", path: "/bears"} = request) do
-    %{request | response_body: "Teddy, Smokey, Paddington", status_code: 200}
+    BearController.index(request, request.params)
   end
 
   def route(%Request{method: "POST", body: body, path: "/bears"} = request) do
@@ -37,7 +37,7 @@ defmodule Servy.Handler do
   end
 
   def route(%Request{method: "DELETE", path: "/bears/" <> _id} = request) do
-    %{request | response_body: "Bears must never be deleted"}
+    BearController.delete(request, request.params)
   end
 
   def route(%Request{method: "GET", path: "/pages/" <> page} = request) do

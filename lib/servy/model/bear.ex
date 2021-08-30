@@ -3,4 +3,8 @@ defmodule Servy.Bear do
             name: "",
             type: "",
             hibernating: false
+
+  def order_asc_by_name(a, b) do
+    a.name <= b.name
+  end
 end
