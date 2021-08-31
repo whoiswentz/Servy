@@ -3,6 +3,7 @@ defmodule Servy.Handler do
 
   alias Servy.Request
   alias Servy.BearController
+  alias Servy.Api
 
   import Servy.Parser, only: [parse: 1]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
@@ -25,6 +26,10 @@ defmodule Servy.Handler do
 
   def route(%Request{method: "GET", path: "/bears"} = request) do
     BearController.index(request, request.params)
+  end
+
+  def route(%Request{method: "GET", path: "/api/bears"} = request) do
+    Api.BearController.index(request, request.params)
   end
 
   def route(%Request{method: "POST", body: body, path: "/bears"} = request) do
@@ -65,10 +70,10 @@ defmodule Servy.Handler do
     %{request | response_body: "No #{path} here", status_code: 404}
   end
 
-  def format_response(%Request{response_body: response_body} = request) do
+  def format_response(%Request{headers: headers, response_body: response_body} = request) do
     """
     HTTP/1.1 #{Request.full_status(request)}\r
-    Content-Type: text/html\r
+    Content-Type: #{headers["Content-Type"]}\r
     Content-Length: #{String.length(response_body)}\r
     \r
     #{response_body}

@@ -26,3 +26,15 @@ defmodule Servy.BearController do
     %{request | response_body: "Bears must never be deleted"}
   end
 end
+
+defmodule Servy.Api.BearController do
+  alias Servy.Wildthings
+
+  def index(request, _params) do
+    items =
+      Wildthings.list_bears()
+      |> Poison.encode!()
+
+    %{request | status_code: 200, response_body: items}
+  end
+end
