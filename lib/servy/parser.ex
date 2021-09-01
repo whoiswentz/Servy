@@ -2,6 +2,7 @@ defmodule Servy.Parser do
   alias Servy.Request
 
   def parse(request) do
+    IO.inspect(request)
     [request_info, body] = String.split(request, "\r\n\r\n")
     [start_line | headers] = String.split(request_info, "\r\n")
     [method, path, _] = start_line |> String.split(" ")

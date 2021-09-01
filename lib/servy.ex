@@ -22,7 +22,11 @@ defmodule Servy do
 
     Logger.info("Connection accepted\n")
 
-    serve(client_socket)
+    serve_pid = spawn(fn -> serve(client_socket) end)
+
+    # Tranfering the socket ownership
+    :ok = :gen_tcp.controlling_process(client_socket, serve_pid)
+
     accept_loop(listen_socket)
   end
 
