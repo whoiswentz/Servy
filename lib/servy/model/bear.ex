@@ -5,7 +5,7 @@ defmodule Servy.Bear do
   @type name :: String.t()
   @type type :: String.t()
   @type hibernating :: Boolean.t()
-  @type t :: %Servy.Bear{id: id, name: name, type: type, hibernating: hibernating}
+  @type t :: %Bear{id: id, name: name, type: type, hibernating: hibernating}
 
   @enforce_keys [:id, :name, :type, :hibernating]
   defstruct [:id, :name, :type, :hibernating]
