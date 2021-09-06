@@ -21,31 +21,17 @@ defmodule Servy.Handler do
     |> format_response
   end
 
-  def route(%Request{method: "GET", path: "/snapshots"} = request) do
-    parent = self()
+  def route(%Request{method: "GET", path: "/sensors"} = request) do
+    task = Task.async(Servy.Tracker, :get_location, ["bigfoot"])
 
-    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("camera-1")}) end)
-    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("camera-2")}) end)
-    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("camera-3")}) end)
+    snapshots =
+      ["camera-1", "camera-2", "camera-3"]
+      |> Enum.map(&Task.async(VideoCam, :get_snapshot, [&1]))
+      |> Enum.map(&Task.await/1)
 
-    snapshot1 =
-      receive do
-        {:result, filename} -> filename
-      end
+    where_is_bigfoot = Task.await(task)
 
-    snapshot2 =
-      receive do
-        {:result, filename} -> filename
-      end
-
-    snapshot3 =
-      receive do
-        {:result, filename} -> filename
-      end
-
-    snapshots = [snapshot1, snapshot2, snapshot3]
-
-    %{request | status_code: 200, response_body: inspect(snapshots)}
+    %{request | status_code: 200, response_body: inspect({snapshots, where_is_bigfoot})}
   end
 
   def route(%Request{method: "GET", path: "/wildthings"} = request) do
