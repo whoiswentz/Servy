@@ -3,8 +3,8 @@ defmodule Servy.Handler do
 
   alias Servy.Request
   alias Servy.BearController
+  alias Servy.SensorController
   alias Servy.Api
-  alias Servy.VideoCam
 
   import Servy.Parser, only: [parse: 1]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
@@ -22,16 +22,7 @@ defmodule Servy.Handler do
   end
 
   def route(%Request{method: "GET", path: "/sensors"} = request) do
-    task = Task.async(Servy.Tracker, :get_location, ["bigfoot"])
-
-    snapshots =
-      ["camera-1", "camera-2", "camera-3"]
-      |> Enum.map(&Task.async(VideoCam, :get_snapshot, [&1]))
-      |> Enum.map(&Task.await/1)
-
-    where_is_bigfoot = Task.await(task)
-
-    %{request | status_code: 200, response_body: inspect({snapshots, where_is_bigfoot})}
+    SensorController.index(request, request.params)
   end
 
   def route(%Request{method: "GET", path: "/wildthings"} = request) do
