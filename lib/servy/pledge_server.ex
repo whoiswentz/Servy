@@ -1,13 +1,13 @@
 defmodule Servy.PledgeServer do
   @process_name :pledge_server
 
-  # CLIENT INTERFACE
-
   def start do
     pid = spawn(__MODULE__, :listen_loop, [[]])
     Process.register(pid, @process_name)
     pid
   end
+
+  # CLIENT INTERFACES
 
   def create_pledge(name, amount) do
     send(@process_name, {self(), :create_pledge, name, amount})
@@ -27,7 +27,16 @@ defmodule Servy.PledgeServer do
     end
   end
 
-  # SERVER INTERFACE
+  def total_pledged do
+    send(@process_name, {self(), :total_pledged})
+
+    receive do
+      {:response, total} ->
+        total
+    end
+  end
+
+  # SERVER INTERFACES
 
   def listen_loop(state) do
     receive do
@@ -40,6 +49,14 @@ defmodule Servy.PledgeServer do
 
       {sender, :recent_pledges} ->
         send(sender, {:response, state})
+        listen_loop(state)
+
+      {sender, :total_pledged} ->
+        total = Enum.reduce(state, 0, fn {_name, amount}, acc -> amount + acc end)
+        send(sender, {:response, total})
+        listen_loop(state)
+
+      _ ->
         listen_loop(state)
     end
   end
@@ -56,7 +73,7 @@ end
 # PledgeServer.start()
 
 # IO.inspect(PledgeServer.create_pledge("moe", 10))
-# IO.inspect(PledgeServer.create_pledge("moe", 10))
+# IO.inspect(PledgeServer.create_pledge("lary", 100))
 # IO.inspect(PledgeServer.create_pledge("moe", 10))
 # IO.inspect(PledgeServer.create_pledge("moe", 10))
 # IO.inspect(PledgeServer.create_pledge("moe", 10))

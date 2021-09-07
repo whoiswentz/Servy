@@ -28,8 +28,8 @@ defmodule Servy.Handler do
     PledgeController.index(request)
   end
 
-  def route(%Request{method: "POST", path: "/pledges"} = request) do
-    PledgeController.create(request, request.params)
+  def route(%Request{method: "POST", path: "/pledges", body: body} = request) do
+    PledgeController.create(request, body)
   end
 
   def route(%Request{method: "GET", path: "/sensors"} = request) do
