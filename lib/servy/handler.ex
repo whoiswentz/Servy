@@ -2,9 +2,12 @@ defmodule Servy.Handler do
   require Logger
 
   alias Servy.Request
+
+  alias Servy.Api
+
   alias Servy.BearController
   alias Servy.SensorController
-  alias Servy.Api
+  alias Servy.PledgeController
 
   import Servy.Parser, only: [parse: 1]
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
@@ -19,6 +22,14 @@ defmodule Servy.Handler do
     |> route
     |> track
     |> format_response
+  end
+
+  def route(%Request{method: "GET", path: "/pledges"} = request) do
+    PledgeController.index(request)
+  end
+
+  def route(%Request{method: "POST", path: "/pledges"} = request) do
+    PledgeController.create(request, request.params)
   end
 
   def route(%Request{method: "GET", path: "/sensors"} = request) do
