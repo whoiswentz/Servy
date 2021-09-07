@@ -24,6 +24,12 @@ defmodule Servy.Handler do
     |> format_response
   end
 
+  def route(%Request{method: "GET", path: "404s"} = request) do
+    counts = Servy.FourOhFourCounter.get_counts()
+
+    %{request | status_code: 200, response_body: inspect(counts)}
+  end
+
   def route(%Request{method: "GET", path: "/pledges"} = request) do
     PledgeController.index(request)
   end
@@ -83,6 +89,7 @@ defmodule Servy.Handler do
   end
 
   def route(%Request{path: path} = request) do
+    Servy.FourOhFourCounter.bump_count(path)
     %{request | response_body: "No #{path} here", status_code: 404}
   end
 
