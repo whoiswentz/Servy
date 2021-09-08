@@ -1,57 +1,37 @@
 defmodule Servy.FourOhFourCounter do
   @name __MODULE__
 
+  alias Servy.GenericServer
+
   def start(initial_state \\ %{}) do
-    pid = spawn(@name, :listen_loop, [initial_state])
-    Process.register(pid, @name)
-    pid
+    GenericServer.start(__MODULE__, @name, initial_state)
   end
 
   def bump_count(path) do
-    send(@name, {self(), :bump_count, path})
-
-    receive do
-      {:response, count} ->
-        count
-    end
+    GenericServer.call(@name, {:bump_count, path})
   end
 
   def get_counts do
-    send(@name, {self(), :get_counts})
-
-    receive do
-      {:response, counts} ->
-        counts
-    end
+    GenericServer.call(@name, :get_counts)
   end
 
   def get_count(path) do
-    send(@name, {self(), :get_count, path})
-
-    receive do
-      {:response, count} ->
-        count
-    end
+    GenericServer.call(@name, {:get_count, path})
   end
 
-  def listen_loop(state) do
-    receive do
-      {sender, :bump_count, path} ->
-        new_state = Map.update(state, path, 1, &(&1 + 1))
-        send(sender, {:response, :ok})
-        listen_loop(new_state)
+  # SERVER CALLBACKS
+  def handle_call({:bump_count, path}, state) do
+    new_state = Map.update(state, path, 1, &(&1 + 1))
 
-      {sender, :get_counts} ->
-        send(sender, {:response, state})
-        listen_loop(state)
+    {:ok, new_state}
+  end
 
-      {sender, :get_count, path} ->
-        count = Map.get(state, path, 0)
-        send(sender, {:response, count})
-        listen_loop(state)
+  def handle_call(:get_counts, state) do
+    {state, state}
+  end
 
-      _ ->
-        listen_loop(state)
-    end
+  def handle_call({:get_count, path}, state) do
+    count = Map.get(state, path, 0)
+    {count, state}
   end
 end
