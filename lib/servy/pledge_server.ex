@@ -1,65 +1,113 @@
 defmodule Servy.PledgeServer do
-  @process_name __MODULE__
+  @name __MODULE__
 
-  alias Servy.GenericServer
+  use GenServer
 
-  def start(initial_state \\ []) do
-    GenericServer.start(__MODULE__, @process_name, initial_state)
+  defmodule State do
+    defstruct cache_size: 3, pledges: []
   end
 
-  # CLIENT INTERFACES
+  # CLIENT INTERFACE
+  def start do
+    GenServer.start(__MODULE__, %State{}, name: @name)
+  end
 
   def create_pledge(name, amount) do
-    GenericServer.call(@process_name, {:create_pledge, name, amount})
+    GenServer.call(@name, {:create_pledge, name, amount})
   end
 
   def recent_pledge do
-    GenericServer.call(@process_name, :recent_pledges)
+    GenServer.call(@name, :recent_pledges)
   end
 
   def total_pledged do
-    GenericServer.call(@process_name, :total_pledged)
+    GenServer.call(@name, :total_pledged)
   end
 
   def clear do
-    GenericServer.cast(@process_name, :clear)
+    GenServer.cast(@name, :clear)
+  end
+
+  def set_cache_size(size) do
+    GenServer.cast(@name, {:set_cache_size, size})
+  end
+
+  defp send_pledge_to_service(_name, _amount) do
+    {:ok, "pledge-#{:rand.uniform(1000)}"}
   end
 
   # SERVER CALLBACKS
-  def handle_call(:total_pledged, state) do
-    total = Enum.reduce(state, 0, fn {_name, amount}, acc -> amount + acc end)
-    {total, state}
+
+  # Used to initialize the server state
+  def init(init_arg) do
+    {:ok, init_arg}
   end
 
-  def handle_call({:create_pledge, name, amount}, state) do
+  def handle_call(:total_pledged, _from, %State{pledges: pledges} = state) do
+    total = Enum.reduce(pledges, 0, fn {_name, amount}, acc -> amount + acc end)
+    {:reply, total, state}
+  end
+
+  def handle_call(
+        {:create_pledge, name, amount},
+        _from,
+        %State{pledges: pledges, cache_size: cache_size} = state
+      ) do
     {:ok, id} = send_pledge_to_service(name, amount)
-    most_recent_pledges = Enum.take(state, 2)
-    new_state = [{name, amount} | most_recent_pledges]
-    {id, new_state}
+
+    most_recent_pledges = Enum.take(pledges, cache_size - 1)
+    cached_pledges = [{name, amount} | most_recent_pledges]
+
+    new_state = %State{state | pledges: cached_pledges}
+
+    {:reply, id, new_state}
   end
 
-  def handle_call(:recent_pledges, state) do
-    {state, state}
+  def handle_call(:recent_pledges, _from, %State{pledges: pledges} = state) do
+    {:reply, pledges, state}
   end
 
-  def handle_cast(:clear, _state) do
-    []
+  def handle_cast(:clear, state) do
+    new_state = %State{state | pledges: []}
+    {:noreply, new_state}
   end
 
-  # PRIVATE FUNCTIONS
-  defp send_pledge_to_service(_name, _amount) do
-    {:ok, "pledge-#{:rand.uniform(1000)}"}
+  def handle_cast({:set_cache_size, size}, state) do
+    new_state = %State{state | cache_size: size}
+    {:noreply, new_state}
+  end
+
+  # if unexpected message is sent to the server, handle_info will be called
+  def handle_info(_message, state) do
+    {:noreply, state}
   end
 end
 
 # alias Servy.PledgeServer
 
-# PledgeServer.start()
+# {:ok, pid} = PledgeServer.start()
 
 # IO.inspect(PledgeServer.create_pledge("moe", 10))
 # IO.inspect(PledgeServer.create_pledge("lary", 100))
-# IO.inspect(PledgeServer.create_pledge("moe", 10))
-# IO.inspect(PledgeServer.create_pledge("moe", 10))
-# IO.inspect(PledgeServer.create_pledge("moe", 10))
+# IO.inspect(PledgeServer.create_pledge("asd", 12))
+# IO.inspect(PledgeServer.create_pledge("qwe", 43))
+# IO.inspect(PledgeServer.recent_pledge())
+
+# PledgeServer.clear
+
+# IO.inspect(PledgeServer.create_pledge("vbcv", 56))
+# IO.inspect(PledgeServer.create_pledge("123", 100))
+# IO.inspect(PledgeServer.create_pledge("12", 234))
+# IO.inspect(PledgeServer.create_pledge("cv", 5676))
+
+# IO.inspect(PledgeServer.recent_pledge())
+# PledgeServer.clear
+# PledgeServer.set_cache_size(5)
+
+# IO.inspect(PledgeServer.create_pledge("fgd", 23))
+# IO.inspect(PledgeServer.create_pledge("jgh", 1))
+# IO.inspect(PledgeServer.create_pledge("iuyu", 567))
+# IO.inspect(PledgeServer.create_pledge("bvnv", 43))
+# IO.inspect(PledgeServer.create_pledge("nwnm", 234))
 
 # IO.inspect(PledgeServer.recent_pledge())
