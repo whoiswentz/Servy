@@ -41,7 +41,7 @@ defmodule Servy.PledgeServer do
   alias Servy.GenericServer
 
   def start(initial_state \\ []) do
-    GenericServer.start(__MODULE__, @process_name)
+    GenericServer.start(__MODULE__, @process_name, initial_state)
   end
 
   # CLIENT INTERFACES
