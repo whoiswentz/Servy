@@ -8,7 +8,8 @@ defmodule Servy.SensorServer do
 
   @name __MODULE__
 
-  def start do
+  def start_link(_init_args) do
+    Logger.info("Starting #{__MODULE__}")
     GenServer.start(__MODULE__, %{}, name: @name)
   end
 
@@ -31,7 +32,7 @@ defmodule Servy.SensorServer do
 
   def init(_init_state) do
     init_state = run_tasks_to_get_sensor_data()
-    Process.send_after(self(), :refresh, :timer.seconds(5))
+    Process.send_after(self(), :refresh, :timer.minutes(10))
     {:ok, init_state}
   end
 
@@ -42,7 +43,7 @@ defmodule Servy.SensorServer do
   def handle_info(:refresh, _state) do
     Logger.info("refreshing the sensor data")
     new_state = run_tasks_to_get_sensor_data()
-    Process.send_after(self(), :refresh, :timer.seconds(5))
+    Process.send_after(self(), :refresh, :timer.minutes(10))
     {:noreply, new_state}
   end
 end

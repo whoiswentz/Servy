@@ -1,9 +1,12 @@
 defmodule Servy.FourOhFourCounter do
   use GenServer
 
+  require Logger
+
   @name __MODULE__
 
-  def start(initial_state \\ %{}) do
+  def start_link(initial_state \\ %{}) do
+    Logger.info("Starting #{__MODULE__}")
     GenServer.start(__MODULE__, initial_state, name: @name)
   end
 

@@ -3,12 +3,15 @@ defmodule Servy.PledgeServer do
 
   use GenServer
 
+  require Logger
+
   defmodule State do
     defstruct cache_size: 3, pledges: []
   end
 
   # CLIENT INTERFACE
-  def start do
+  def start_link(_init_args) do
+    Logger.info("Starting #{__MODULE__}")
     GenServer.start(__MODULE__, %State{}, name: @name)
   end
 

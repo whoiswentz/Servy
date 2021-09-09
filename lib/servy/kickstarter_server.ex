@@ -1,8 +1,11 @@
 defmodule Servy.KickstarterServer do
   use GenServer
 
-  def start do
-    GenServer.start(__MODULE__, :ok, name: __MODULE__)
+  require Logger
+
+  def start_link(_init_args) do
+    Logger.info("Starting #{__MODULE__}")
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   defp start_server do
